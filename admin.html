@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center - V. DOWNLOADER</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5872845639819009"
+     crossorigin="anonymous"></script>
+    
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        :root {
+            --bg-dark: #0a0b1a;
+            --sidebar-bg: #12132a;
+            --card-bg: #1a1c33;
+            --card-hover: #22243d;
+            --card-border: #2a2c4e;
+            --text-light: #ffffff;
+            --text-muted: #8b8ea6;
+            --neon-pink: #ff2a6d;
+            --neon-blue: #05d9e8;
+            --neon-purple: #9b5de5;
+            --neon-green: #06d6a0;
+            --input-bg: #232544;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-light); min-height: 100vh; display: flex; overflow-x: hidden; }
+        
+        .login-screen { width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at 50% 0%, #2a2350 0%, var(--bg-dark) 70%); }
+        .login-card { width: 100%; max-width: 420px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 40px 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+        .login-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue)); }
+        .login-logo { text-align: center; margin-bottom: 30px; }
+        .login-logo h1 { font-size: 26px; font-weight: 700; text-transform: uppercase; }
+        .login-logo h1 .red { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255, 42, 109, 0.5); }
+        .login-logo p { color: var(--text-muted); font-size: 13px; margin-top: 5px; }
+        
+        .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--card-border); padding: 25px 15px; display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; transition: transform 0.3s; }
+        .sidebar-logo { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); }
+        .sidebar-logo h1 { font-size: 20px; font-weight: 700; }
+        .sidebar-logo h1 .red { color: var(--neon-pink); }
+        .sidebar-logo h1 .blue { color: var(--neon-blue); }
+        .sidebar-logo small { color: var(--text-muted); font-size: 11px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 10px; color: var(--text-muted); cursor: pointer; margin-bottom: 5px; transition: all 0.3s; font-size: 14px; font-weight: 500; }
+        .nav-item:hover { background: var(--card-bg); color: var(--text-light); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(255,42,109,0.15), rgba(5,217,232,0.15)); color: var(--neon-blue); border-left: 3px solid var(--neon-blue); }
+        .nav-item i { width: 20px; text-align: center; }
+        .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--card-border); }
+        .logout-btn { width: 100%; padding: 12px; background: rgba(255,42,109,0.1); border: 1px solid rgba(255,42,109,0.3); color: var(--neon-pink); border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .logout-btn:hover { background: var(--neon-pink); color: white; }
+        
+        .main-content { flex: 1; margin-left: 260px; padding: 25px 30px; min-height: 100vh; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); }
+        .topbar h2 { font-size: 22px; font-weight: 600; }
+        .topbar h2 span { color: var(--neon-blue); }
+        .topbar-status { display: flex; align-items: center; gap: 8px; background: var(--card-bg); padding: 8px 15px; border-radius: 20px; font-size: 13px; border: 1px solid var(--card-border); }
+        .status-dot { width: 8px; height: 8px; background: var(--neon-green); border-radius: 50%; box-shadow: 0 0 10px var(--neon-green); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--neon-blue); }
+        .stat-card.pink::before { background: var(--neon-pink); }
+        .stat-card.purple::before { background: var(--neon-purple); }
+        .stat-card.green::before { background: var(--neon-green); }
+        .stat-icon { font-size: 24px; margin-bottom: 10px; color: var(--neon-blue); }
+        .stat-card.pink .stat-icon { color: var(--neon-pink); }
+        .stat-card.purple .stat-icon { color: var(--neon-purple); }
+        .stat-card.green .stat-icon { color: var(--neon-green); }
+        .stat-value { font-size: 24px; font-weight: 700; margin-bottom: 3px; }
+        .stat-label { font-size: 12px; color: var(--text-muted); }
+        
+        .section { display: none; animation: fadeIn 0.4s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+        .card-title { font-size: 16px; font-weight: 600; color: var(--neon-blue); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--neon-pink); }
+        
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .form-control { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--input-bg); color: white; outline: none; font-size: 14px; transition: 0.2s; }
+        .form-control:focus { border-color: var(--neon-blue); box-shadow: 0 0 0 3px rgba(5,217,232,0.1); }
+        textarea.form-control { resize: vertical; font-family: 'Courier New', monospace; font-size: 12px; }
+        
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .platform-card { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 15px; transition: 0.3s; }
+        .platform-card:hover { border-color: var(--neon-blue); }
+        .platform-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 600; font-size: 14px; }
+        .platform-header.tiktok i { color: #ff0050; }
+        .platform-header.facebook i { color: #1877f2; }
+        .platform-header.youtube i { color: #ff0000; }
+        .platform-header.likee i { color: #ffcc00; }
+        
+        .switch-container { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 12px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue)); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue)); color: white; }
+        .btn-primary:hover { box-shadow: 0 5px 20px rgba(255,42,109,0.4); transform: translateY(-2px); }
+        .btn-block { width: 100%; justify-content: center; }
+        
+        .quality-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--input-bg); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--card-border); }
+        .quality-item .quality-label { font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .tag { background: rgba(255,42,109,0.15); padding: 3px 8px; border-radius: 6px; font-size: 11px; color: var(--neon-pink); font-weight: 600; }
+        .tag-free { background: rgba(6,214,160,0.15); color: var(--neon-green); }
+        
+        .logs-container { max-height: 500px; overflow-y: auto; border-radius: 12px; }
+        .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .log-table th { padding: 14px 12px; text-align: left; color: var(--neon-blue); background: var(--input-bg); font-weight: 600; position: sticky; top: 0; font-size: 12px; text-transform: uppercase; }
+        .log-table td { padding: 14px 12px; border-bottom: 1px solid var(--card-border); color: var(--text-muted); font-size: 13px; }
+        .log-table tr:hover td { background: var(--card-hover); }
+        .log-table td strong { color: var(--text-light); font-weight: 500; }
+        .log-table td small { color: var(--text-muted); font-size: 11px; }
+        
+        .mobile-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 101; background: var(--neon-blue); color: var(--bg-dark); border: none; width: 45px; height: 45px; border-radius: 12px; font-size: 20px; cursor: pointer; }
+        
+        .toast { position: fixed; top: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--neon-green); color: var(--text-light); padding: 15px 20px; border-radius: 10px; z-index: 9999; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transform: translateX(400px); transition: transform 0.3s; }
+        .toast.show { transform: translateX(0); }
+        .toast i { color: var(--neon-green); font-size: 20px; }
+        
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 70px 15px 20px; }
+            .mobile-toggle { display: block; }
+            .grid-4 { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+
+    <!-- LOGIN SCREEN -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">
+                <h1><span class="red">V.</span> DOWNLOADER</h1>
+                <p>Admin Control Panel</p>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="adminEmail" class="form-control" placeholder="admin@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="adminPass" class="form-control" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary btn-block" onclick="loginAdmin()">
+                <i class="fa-solid fa-right-to-bracket"></i> Login to Dashboard
+            </button>
+            <p id="loginError" style="color:var(--neon-pink); text-align:center; margin-top:15px; font-size:13px;"></p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" style="display:none; width:100%;">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <h1><span class="red">V.</span> <span class="blue">DOWNLOADER</span></h1>
+                <small>Admin Control Center</small>
+            </div>
+            <nav>
+                <div class="nav-item active" data-section="overview" onclick="switchSection('overview', this)">
+                    <i class="fa-solid fa-chart-pie"></i> Overview
+                </div>
+                <div class="nav-item" data-section="api" onclick="switchSection('api', this)">
+                    <i class="fa-solid fa-server"></i> RapidAPI Settings
+                </div>
+                <div class="nav-item" data-section="ads" onclick="switchSection('ads', this)">
+                    <i class="fa-solid fa-bullhorn"></i> Ads & Timer
+                </div>
+                <div class="nav-item" data-section="quality" onclick="switchSection('quality', this)">
+                    <i class="fa-solid fa-lock"></i> Quality Control
+                </div>
+                <div class="nav-item" data-section="logs" onclick="switchSection('logs', this)">
+                    <i class="fa-solid fa-list-ul"></i> User Logs
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logoutAdmin()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="topbar">
+                <h2>Welcome, <span>Admin</span></h2>
+                <div class="topbar-status">
+                    <span class="status-dot"></span> Firebase Connected
+                </div>
+            </div>
+
+            <!-- OVERVIEW -->
+            <div class="section active" id="section-overview">
+                <div class="stats-grid">
+                    <div class="stat-card pink">
+                        <div class="stat-icon"><i class="fa-solid fa-download"></i></div>
+                        <div class="stat-value" id="statDownloads">0</div>
+                        <div class="stat-label">Total Downloads</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-value" id="statUsers">0</div>
+                        <div class="stat-label">Unique Users (IPs)</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon"><i class="fa-solid fa-lock"></i></div>
+                        <div class="stat-value" id="statLocked">0</div>
+                        <div class="stat-label">Locked Qualities</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                        <div class="stat-value" id="statAds">OFF</div>
+                        <div class="stat-label">Ads Status</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-circle-info"></i> System Information</div>
+                    <p style="color:var(--text-muted); font-size:14px; line-height:1.8;">
+                        এই ড্যাশবোর্ড থেকে আপনি RapidAPI কী, API এন্ডপয়েন্ট, অ্যাডস টাইমার, কোয়ালিটি লক কন্ট্রোল এবং ইউজার লগ সবকিছু নিয়ন্ত্রণ করতে পারবেন। 
+                        সব পরিবর্তন রিয়েল-টাইমে ইউজার অ্যাপে আপডেট হয়ে যাবে।
+                    </p>
+                </div>
+            </div>
+
+            <!-- API -->
+            <div class="section" id="section-api">
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-key"></i> Global RapidAPI Key</div>
+                    <div class="form-group">
+                        <label>RapidAPI Key (সব প্ল্যাটফর্মে ব্যবহার হবে)</label>
+                        <input type="text" id="apiKeyInput" class="form-control" placeholder="Enter your RapidAPI Key...">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-network-wired"></i> Platform Endpoints</div>
+                    <div class="grid-4">
+                        <div class="platform-card">
+                            <div class="platform-header tiktok"><i class="fa-brands fa-tiktok"></i> TikTok</div>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label style="font-size:11px;">Host</label>
+                                <input type="text" id="tiktokHost" class="form-control" placeholder="tiktok-api.p.rapidapi.com">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:11px;">Endpoint URL</label>
+                                <input type="text" id="tiktokEndpoint" class="form-control" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="platform-card">
+                            <div class="platform-header facebook"><i class="fa-brands fa-facebook"></i> Facebook</div>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label style="font-size:11px;">Host</label>
+                                <input type="text" id="fbHost" class="form-control" placeholder="facebook-api.p.rapidapi.com">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:11px;">Endpoint URL</label>
+                                <input type="text" id="fbEndpoint" class="form-control" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="platform-card">
+                            <div class="platform-header youtube"><i class="fa-brands fa-youtube"></i> YouTube</div>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label style="font-size:11px;">Host</label>
+                                <input type="text" id="ytHost" class="form-control" placeholder="youtube-api.p.rapidapi.com">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:11px;">Endpoint URL</label>
+                                <input type="text" id="ytEndpoint" class="form-control" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="platform-card">
+                            <div class="platform-header likee"><i class="fa-solid fa-circle-play"></i> Likee</div>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label style="font-size:11px;">Host</label>
+                                <input type="text" id="likeeHost" class="form-control" placeholder="likee-api.p.rapidapi.com">
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:11px;">Endpoint URL</label>
+                                <input type="text" id="likeeEndpoint" class="form-control" placeholder="https://...">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="saveApiSettings()">
+                        <i class="fa-solid fa-save"></i> Save API Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- ADS -->
+            <div class="section" id="section-ads">
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-bullhorn"></i> Ad Controls</div>
+                    <div class="switch-container">
+                        <div>
+                            <div style="font-weight:600; font-size:14px;">Enable Ads System</div>
+                            <div style="color:var(--text-muted); font-size:12px;">লক করা কোয়ালিটিতে অ্যাডস দেখাবে</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="globalAdsToggle" onchange="updateGlobalAds()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Ad Timer Duration (Seconds)</label>
+                        <input type="number" id="adTimerInput" class="form-control" placeholder="e.g. 5" min="1" max="60">
+                    </div>
+                    <div class="form-group">
+                        <label>AdSense HTML Code (Ad Unit)</label>
+                        <textarea id="adsenseCodeInput" class="form-control" rows="6" placeholder="<ins class='adsbygoogle'...></ins>"></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="saveAdSettings()">
+                        <i class="fa-solid fa-save"></i> Save Ad Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- QUALITY -->
+            <div class="section" id="section-quality">
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-lock"></i> Quality Lock Control</div>
+                    <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">
+                        যে কোয়ালিটি লক করবেন, ইউজারকে সেখানে ডাউনলোড করতে অ্যাডস দেখতে হবে।
+                    </p>
+                    <div id="qualityList"></div>
+                </div>
+            </div>
+
+            <!-- LOGS -->
+            <div class="section" id="section-logs">
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-list-ul"></i> User Download Logs (Real-time)</div>
+                    <div class="logs-container">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>IP Address / ISP</th>
+                                    <th>Location</th>
+                                    <th>Device</th>
+                                    <th>Quality</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody">
+                                <tr><td colspan="5" style="text-align:center; padding:30px;">No logs yet...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Saved!</span>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        // ====== আপনার FIREBASE কনফিগারেশন ======
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZsGCzMd3PGjt3wqwMOFnnftOI7TIJg24",
+            authDomain: "myovertimebd-77e59.firebaseapp.com",
+            databaseURL: "https://myovertimebd-77e59-default-rtdb.firebaseio.com",
+            projectId: "myovertimebd-77e59",
+            storageBucket: "myovertimebd-77e59.firebasestorage.app",
+            messagingSenderId: "872071063236",
+            appId: "1:872071063236:web:4a04c4603b74a8eb3c0b91",
+            measurementId: "G-BQKZVKHYGM"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        const qualities = ['144p', '240p', '360p', '480p', '720p', '1080p'];
+
+        function loginAdmin() {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            auth.signInWithEmailAndPassword(email, pass)
+                .catch((error) => { document.getElementById('loginError').textContent = error.message; });
+        }
+
+        function logoutAdmin() { auth.signOut().then(() => location.reload()); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+        function switchSection(sectionName, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-' + sectionName).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function loadSettings() {
+            db.ref('settings').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    if(data.api) {
+                        document.getElementById('apiKeyInput').value = data.api.key || '';
+                        document.getElementById('tiktokHost').value = data.api.tiktok?.host || '';
+                        document.getElementById('tiktokEndpoint').value = data.api.tiktok?.endpoint || '';
+                        document.getElementById('fbHost').value = data.api.facebook?.host || '';
+                        document.getElementById('fbEndpoint').value = data.api.facebook?.endpoint || '';
+                        document.getElementById('ytHost').value = data.api.youtube?.host || '';
+                        document.getElementById('ytEndpoint').value = data.api.youtube?.endpoint || '';
+                        document.getElementById('likeeHost').value = data.api.likee?.host || '';
+                        document.getElementById('likeeEndpoint').value = data.api.likee?.endpoint || '';
+                    }
+                    document.getElementById('globalAdsToggle').checked = data.adsEnabled || false;
+                    document.getElementById('adTimerInput').value = data.adTimer || 5;
+                    document.getElementById('adsenseCodeInput').value = data.adsenseCode || '';
+                    document.getElementById('statAds').textContent = data.adsEnabled ? 'ON' : 'OFF';
+
+                    const qualityList = document.getElementById('qualityList');
+                    qualityList.innerHTML = '';
+                    let lockedCount = 0;
+                    qualities.forEach(q => {
+                        const isLocked = data.lockedQualities && data.lockedQualities[q];
+                        if (isLocked) lockedCount++;
+                        qualityList.innerHTML += `
+                            <div class="quality-item">
+                                <div class="quality-label">
+                                    ${q}
+                                    ${isLocked ? '<span class="tag">AD REQUIRED</span>' : '<span class="tag tag-free">FREE</span>'}
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" ${isLocked ? 'checked' : ''} onchange="toggleQuality('${q}', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>`;
+                    });
+                    document.getElementById('statLocked').textContent = lockedCount;
+                } else {
+                    // Initialize Default Settings
+                    db.ref('settings').set({
+                        api: { 
+                            key: "", 
+                            tiktok: {host:"tiktok-video-no-watermark2.p.rapidapi.com", endpoint:"https://tiktok-video-no-watermark2.p.rapidapi.com/"},
+                            facebook: {host:"facebook-video-downloader1.p.rapidapi.com", endpoint:"https://facebook-video-downloader1.p.rapidapi.com/"},
+                            youtube: {host:"youtube-media-downloader.p.rapidapi.com", endpoint:"https://youtube-media-downloader.p.rapidapi.com/v2/video/details"},
+                            likee: {host:"likee-video-downloader-without-watermark.p.rapidapi.com", endpoint:"https://likee-video-downloader-without-watermark.p.rapidapi.com/"}
+                        },
+                        adsEnabled: true, adTimer: 5, adsenseCode: "",
+                        lockedQualities: { '144p': true, '240p': true, '360p': false, '480p': false, '720p': false, '1080p': false }
+                    });
+                }
+            });
+        }
+
+        function loadLogs() {
+            db.ref('downloads').limitToLast(100).on('value', (snapshot) => {
+                const logTableBody = document.getElementById('logTableBody');
+                logTableBody.innerHTML = '';
+                let count = 0;
+                let uniqueIPs = new Set();
+                
+                snapshot.forEach((childSnapshot) => {
+                    const log = childSnapshot.val();
+                    count++;
+                    if (log.ip) uniqueIPs.add(log.ip);
+                    const date = new Date(log.timestamp).toLocaleString();
+                    logTableBody.innerHTML = `
+                        <tr>
+                            <td><strong>${date}</strong></td>
+                            <td><strong>${log.ip || 'N/A'}</strong><br><small>${log.isp || ''}</small></td>
+                            <td>${log.city || ''}, ${log.country || ''}</td>
+                            <td>${log.device || 'N/A'}<br><small>${(log.platform || '').substring(0, 40)}...</small></td>
+                            <td><span class="tag">${log.quality || 'N/A'}</span></td>
+                        </tr>
+                    ` + logTableBody.innerHTML;
+                });
+                
+                if (count === 0) {
+                    logTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">No logs yet...</td></tr>';
+                }
+                
+                document.getElementById('statDownloads').textContent = count;
+                document.getElementById('statUsers').textContent = uniqueIPs.size;
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function saveApiSettings() {
+            const apiData = {
+                key: document.getElementById('apiKeyInput').value,
+                tiktok: { host: document.getElementById('tiktokHost').value, endpoint: document.getElementById('tiktokEndpoint').value },
+                facebook: { host: document.getElementById('fbHost').value, endpoint: document.getElementById('fbEndpoint').value },
+                youtube: { host: document.getElementById('ytHost').value, endpoint: document.getElementById('ytEndpoint').value },
+                likee: { host: document.getElementById('likeeHost').value, endpoint: document.getElementById('likeeEndpoint').value }
+            };
+            db.ref('settings/api').set(apiData).then(() => showToast('API Settings Saved!'));
+        }
+
+        function saveAdSettings() {
+            db.ref('settings').update({
+                adTimer: parseInt(document.getElementById('adTimerInput').value) || 5,
+                adsenseCode: document.getElementById('adsenseCodeInput').value
+            }).then(() => showToast('Ad Settings Saved!'));
+        }
+
+        function updateGlobalAds() { 
+            db.ref('settings/adsEnabled').set(document.getElementById('globalAdsToggle').checked)
+                .then(() => showToast('Ads ' + (document.getElementById('globalAdsToggle').checked ? 'Enabled' : 'Disabled')));
+        }
+
+        function toggleQuality(quality, isLocked) { 
+            db.ref(`settings/lockedQualities/${quality}`).set(isLocked)
+                .then(() => showToast(`${quality} ${isLocked ? 'Locked' : 'Unlocked'}`));
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadSettings();
+                loadLogs();
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+  </html>  
