@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MY OVERTIME BD - Downloader</title>
+    <title>V DOWNLOADER </title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -151,31 +151,64 @@
             spinner.style.display = 'block';
 
             try {
-                const API_ENDPOINT = '/api/download'; 
-
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: urlInput, platform: currentPlatform })
-                });
-
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("সার্ভার থেকে ভুল ডেটা আসছে। api/app.py ফাইলটি সঠিক জায়গায় আছে কিনা চেক করুন।");
+                // ফ্রন্টএন্ড থেকেই সরাসরি কাজ করার জন্য ফ্রি API ব্যবহার করা হচ্ছে
+                let apiUrl = '';
+                
+                if (currentPlatform === 'tiktok') {
+                    apiUrl = `https://tikwm.com/api/?url=${encodeURIComponent(urlInput)}`;
+                    const res = await fetch(apiUrl);
+                    const data = await res.json();
+                    
+                    if (data.code === 0 && data.data && data.data.play) {
+                        resultTitle.textContent = data.data.title || 'TikTok ভিডিও পাওয়া গেছে!';
+                        downloadLink.href = data.data.play; 
+                        resultArea.classList.add('active');
+                    } else {
+                        throw new Error('TikTok ভিডিও পাওয়া যায়নি। লিংকটি চেক করুন।');
+                    }
+                } 
+                else if (currentPlatform === 'facebook') {
+                    apiUrl = `https://api.nexoracle.com/downloader/facebook?url=${encodeURIComponent(urlInput)}`;
+                    const res = await fetch(apiUrl);
+                    const data = await res.json();
+                    
+                    if (data.status === 200 && data.result) {
+                        resultTitle.textContent = 'Facebook ভিডিও পাওয়া গেছে!';
+                        downloadLink.href = data.result.hd || data.result.sd; 
+                        resultArea.classList.add('active');
+                    } else {
+                        throw new Error('Facebook ভিডিও পাওয়া যায়নি। লিংকটি পাবলিক কিনা চেক করুন।');
+                    }
                 }
-
-                const data = await response.json();
-
-                if (data.success && data.videoUrl) {
-                    resultTitle.textContent = data.title || 'ভিডিও সফলভাবে পাওয়া গেছে!';
-                    downloadLink.href = data.videoUrl;
-                    resultArea.classList.add('active');
-                } else {
-                    throw new Error(data.error || 'ডাউনলোড লিংক পাওয়া যায়নি।');
+                else if (currentPlatform === 'youtube') {
+                    apiUrl = `https://api.nexoracle.com/downloader/ytmp4?url=${encodeURIComponent(urlInput)}`;
+                    const res = await fetch(apiUrl);
+                    const data = await res.json();
+                    
+                    if (data.status === 200 && data.result) {
+                        resultTitle.textContent = data.result.title || 'YouTube ভিডিও পাওয়া গেছে!';
+                        downloadLink.href = data.result.url; 
+                        resultArea.classList.add('active');
+                    } else {
+                        throw new Error('YouTube ভিডিও পাওয়া যায়নি। লিংকটি চেক করুন।');
+                    }
+                }
+                else if (currentPlatform === 'likee') {
+                    apiUrl = `https://api.nexoracle.com/downloader/likee?url=${encodeURIComponent(urlInput)}`;
+                    const res = await fetch(apiUrl);
+                    const data = await res.json();
+                    
+                    if (data.status === 200 && data.result) {
+                        resultTitle.textContent = 'Likee ভিডিও পাওয়া গেছে!';
+                        downloadLink.href = data.result.video; 
+                        resultArea.classList.add('active');
+                    } else {
+                        throw new Error('Likee ভিডিও পাওয়া যায়নি। লিংকটি চেক করুন।');
+                    }
                 }
 
             } catch (error) {
-                errorMsg.textContent = error.message;
+                errorMsg.textContent = error.message || 'সার্ভারে সমস্যা হচ্ছে, আবার চেষ্টা করুন।';
                 errorMsg.style.display = 'block';
             } finally {
                 btn.disabled = false;
