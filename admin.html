@@ -3,10 +3,12 @@
 <head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5872845639819009"
      crossorigin="anonymous"></script>
+ <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5872845639819009"
+     crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Control Center - V. DOWNLOADER</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         :root {
@@ -106,11 +108,21 @@
         .btn-primary { background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue)); color: white; }
         .btn-primary:hover { box-shadow: 0 5px 20px rgba(255,42,109,0.4); transform: translateY(-2px); }
         .btn-block { width: 100%; justify-content: center; }
+        .btn-danger { background: rgba(255,42,109,0.15); color: var(--neon-pink); border: 1px solid var(--neon-pink); padding: 8px 12px; font-size: 12px; }
+        .btn-danger:hover { background: var(--neon-pink); color: white; }
+        .btn-small { padding: 8px 14px; font-size: 12px; }
         
         .quality-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--input-bg); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--card-border); }
         .quality-item .quality-label { font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 10px; }
         .tag { background: rgba(255,42,109,0.15); padding: 3px 8px; border-radius: 6px; font-size: 11px; color: var(--neon-pink); font-weight: 600; }
         .tag-free { background: rgba(6,214,160,0.15); color: var(--neon-green); }
+        
+        /* Ads List Styles */
+        .ads-list { display: flex; flex-direction: column; gap: 15px; }
+        .ad-item { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 15px; position: relative; }
+        .ad-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .ad-item-header h4 { font-size: 14px; color: var(--neon-blue); }
+        .ad-code-preview { background: #000; border-radius: 8px; padding: 10px; font-family: 'Courier New', monospace; font-size: 11px; color: var(--text-muted); max-height: 80px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
         
         .logs-container { max-height: 500px; overflow-y: auto; border-radius: 12px; }
         .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -140,7 +152,7 @@
 
     <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div class="login-screen" id="loginScreen">
         <div class="login-card">
             <div class="login-logo">
@@ -177,7 +189,7 @@
                     <i class="fa-solid fa-server"></i> RapidAPI Settings
                 </div>
                 <div class="nav-item" data-section="ads" onclick="switchSection('ads', this)">
-                    <i class="fa-solid fa-bullhorn"></i> Ads & Timer
+                    <i class="fa-solid fa-bullhorn"></i> Ads Manager
                 </div>
                 <div class="nav-item" data-section="quality" onclick="switchSection('quality', this)">
                     <i class="fa-solid fa-lock"></i> Quality Control
@@ -228,8 +240,7 @@
                 <div class="card">
                     <div class="card-title"><i class="fa-solid fa-circle-info"></i> System Information</div>
                     <p style="color:var(--text-muted); font-size:14px; line-height:1.8;">
-                        এই ড্যাশবোর্ড থেকে আপনি RapidAPI কী, API এন্ডপয়েন্ট, অ্যাডস টাইমার, কোয়ালিটি লক কন্ট্রোল এবং ইউজার লগ সবকিছু নিয়ন্ত্রণ করতে পারবেন। 
-                        সব পরিবর্তন রিয়েল-টাইমে ইউজার অ্যাপে আপডেট হয়ে যাবে।
+                        এই ড্যাশবোর্ড থেকে আপনি RapidAPI কী, API এন্ডপয়েন্ট, একাধিক অ্যাডস, অ্যাডস টাইমার, কোয়ালিটি লক কন্ট্রোল এবং ইউজার লগ সবকিছু নিয়ন্ত্রণ করতে পারবেন। 
                     </p>
                 </div>
             </div>
@@ -298,7 +309,7 @@
                 </div>
             </div>
 
-            <!-- ADS -->
+            <!-- ADS MANAGER (MULTIPLE ADS) -->
             <div class="section" id="section-ads">
                 <div class="card">
                     <div class="card-title"><i class="fa-solid fa-bullhorn"></i> Ad Controls</div>
@@ -316,13 +327,38 @@
                         <label>Ad Timer Duration (Seconds)</label>
                         <input type="number" id="adTimerInput" class="form-control" placeholder="e.g. 5" min="1" max="60">
                     </div>
-                    <div class="form-group">
-                        <label>AdSense HTML Code (Ad Unit)</label>
-                        <textarea id="adsenseCodeInput" class="form-control" rows="6" placeholder="<ins class='adsbygoogle'...></ins>"></textarea>
-                    </div>
-                    <button class="btn btn-primary btn-block" onclick="saveAdSettings()">
-                        <i class="fa-solid fa-save"></i> Save Ad Settings
+                    <button class="btn btn-primary btn-block" onclick="saveAdTimer()">
+                        <i class="fa-solid fa-save"></i> Save Timer
                     </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-rectangle-ad"></i> Multiple AdSense Codes</div>
+                    <p style="color:var(--text-muted); font-size:13px; margin-bottom:15px;">
+                        এখানে একাধিক AdSense কোড যোগ করতে পারেন। ইউজার অ্যাপ প্রতিবার অ্যাড দেখানোর সময় র‍্যান্ডমভাবে একটি অ্যাড দেখাবে।
+                    </p>
+                    
+                    <!-- Add New Ad Form -->
+                    <div style="background:var(--input-bg); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--card-border);">
+                        <h4 style="color:var(--neon-blue); font-size:14px; margin-bottom:12px;"><i class="fa-solid fa-plus-circle"></i> Add New Ad Code</h4>
+                        <div class="form-group">
+                            <label>Ad Title (Optional)</label>
+                            <input type="text" id="newAdTitle" class="form-control" placeholder="e.g. Google AdSense Banner 1">
+                        </div>
+                        <div class="form-group">
+                            <label>AdSense HTML Code</label>
+                            <textarea id="newAdCode" class="form-control" rows="5" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+                        </div>
+                        <button class="btn btn-primary btn-small" onclick="addNewAd()">
+                            <i class="fa-solid fa-plus"></i> Add Ad Code
+                        </button>
+                    </div>
+
+                    <!-- Existing Ads List -->
+                    <h4 style="color:var(--neon-blue); font-size:14px; margin-bottom:12px;"><i class="fa-solid fa-list"></i> Active Ads (<span id="adCount">0</span>)</h4>
+                    <div class="ads-list" id="adsList">
+                        <p style="text-align:center; color:var(--text-muted); padding:20px;">No ads added yet.</p>
+                    </div>
                 </div>
             </div>
 
@@ -408,6 +444,14 @@
             if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
         }
 
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ========== LOAD SETTINGS ==========
         function loadSettings() {
             db.ref('settings').on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -425,9 +469,12 @@
                     }
                     document.getElementById('globalAdsToggle').checked = data.adsEnabled || false;
                     document.getElementById('adTimerInput').value = data.adTimer || 5;
-                    document.getElementById('adsenseCodeInput').value = data.adsenseCode || '';
                     document.getElementById('statAds').textContent = data.adsEnabled ? 'ON' : 'OFF';
 
+                    // Load Multiple Ads
+                    renderAdsList(data.adCodes || {});
+
+                    // Quality list
                     const qualityList = document.getElementById('qualityList');
                     qualityList.innerHTML = '';
                     let lockedCount = 0;
@@ -457,13 +504,77 @@
                             youtube: {host:"youtube-media-downloader.p.rapidapi.com", endpoint:"https://youtube-media-downloader.p.rapidapi.com/v2/video/details"},
                             likee: {host:"likee-video-downloader-without-watermark.p.rapidapi.com", endpoint:"https://likee-video-downloader-without-watermark.p.rapidapi.com/"}
                         },
-                        adsEnabled: true, adTimer: 5, adsenseCode: "",
+                        adsEnabled: true, adTimer: 5,
+                        adCodes: {}, 
                         lockedQualities: { '144p': true, '240p': true, '360p': false, '480p': false, '720p': false, '1080p': false }
                     });
                 }
             });
         }
 
+        // ========== MULTIPLE ADS MANAGEMENT ==========
+        function renderAdsList(adCodes) {
+            const adsList = document.getElementById('adsList');
+            const adKeys = Object.keys(adCodes);
+            document.getElementById('adCount').textContent = adKeys.length;
+            
+            if (adKeys.length === 0) {
+                adsList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">No ads added yet.</p>';
+                return;
+            }
+
+            adsList.innerHTML = '';
+            adKeys.forEach((key, index) => {
+                const ad = adCodes[key];
+                adsList.innerHTML += `
+                    <div class="ad-item">
+                        <div class="ad-item-header">
+                            <h4><i class="fa-solid fa-ad"></i> ${ad.title || 'Ad #' + (index + 1)}</h4>
+                            <button class="btn btn-danger btn-small" onclick="deleteAd('${key}')">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </div>
+                        <div class="ad-code-preview">${escapeHtml(ad.code)}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function addNewAd() {
+            const title = document.getElementById('newAdTitle').value.trim() || 'Ad Code';
+            const code = document.getElementById('newAdCode').value.trim();
+            
+            if (!code) {
+                alert('অ্যাড কোড দিন!');
+                return;
+            }
+
+            const adId = 'ad_' + Date.now();
+            db.ref('settings/adCodes/' + adId).set({
+                title: title,
+                code: code
+            }).then(() => {
+                document.getElementById('newAdTitle').value = '';
+                document.getElementById('newAdCode').value = '';
+                showToast('Ad Added Successfully!');
+            });
+        }
+
+        function deleteAd(adId) {
+            if (confirm('এই অ্যাডটি ডিলিট করতে চান?')) {
+                db.ref('settings/adCodes/' + adId).remove().then(() => {
+                    showToast('Ad Deleted!');
+                });
+            }
+        }
+
+        // ========== LOAD LOGS ==========
         function loadLogs() {
             db.ref('downloads').limitToLast(100).on('value', (snapshot) => {
                 const logTableBody = document.getElementById('logTableBody');
@@ -496,13 +607,7 @@
             });
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
+        // ========== SAVE FUNCTIONS ==========
         function saveApiSettings() {
             const apiData = {
                 key: document.getElementById('apiKeyInput').value,
@@ -514,11 +619,9 @@
             db.ref('settings/api').set(apiData).then(() => showToast('API Settings Saved!'));
         }
 
-        function saveAdSettings() {
-            db.ref('settings').update({
-                adTimer: parseInt(document.getElementById('adTimerInput').value) || 5,
-                adsenseCode: document.getElementById('adsenseCodeInput').value
-            }).then(() => showToast('Ad Settings Saved!'));
+        function saveAdTimer() {
+            db.ref('settings/adTimer').set(parseInt(document.getElementById('adTimerInput').value) || 5)
+                .then(() => showToast('Timer Saved!'));
         }
 
         function updateGlobalAds() { 
